@@ -42,15 +42,17 @@ int main(int argc, char **argv)
 					break;
 				}
 				
-				if(flag3){
-					stav = VYS;
+				if(flag1){
+					stav = OPR2;
+					flag1 = 0;
 					break;
 				}
 				
-				if(flag1){
-					stav = OPR2;
+				if(flag2){
+					stav = VYS;
 					break;
 				}
+							
 				stav = OPE;
 			}
 			break;
@@ -98,8 +100,10 @@ int main(int argc, char **argv)
 					kalkuldata.vys = kalkuldata.a * kalkuldata.b;
 					break;
 					
-					case '/': printf("vysledek: %lf\n", kalkuldata.a / kalkuldata.b);
-					kalkuldata.vys = kalkuldata.a / kalkuldata.b;
+					case '/': 
+						if(kalkuldata.b == 0) break;
+						printf("vysledek: %lf\n", kalkuldata.a / kalkuldata.b);
+						kalkuldata.vys = kalkuldata.a / kalkuldata.b;
 					break;
 				}
 				kalkuldata.prev_ope = kalkuldata.ope;
@@ -119,10 +123,9 @@ int isOperator(char z){
 	return (z == '+' || z == '-' || z == '*' || z == '/') ? 1 : 0;
 }
 
-
 void zadejOperand(char *str, struct KalkulData *ka){
 	
-	puts("zadej operand_cislo");
+	puts("zadej cislo:");
 	fgets(str, 10, stdin);
 	
 	double *d = NULL;
@@ -132,43 +135,42 @@ void zadejOperand(char *str, struct KalkulData *ka){
 		d = &ka->a;
 	else if(stav == OPR2)
 		d = &ka->b;
-	
-	if(sscanf(str, "%c", &znak) == 1){
-		if(znak == 'x'){
-			flag4 = 1;
-			return;
-		} 
-	}
-
+		
 	while(sscanf(str, "%lf", d) == 0){
-		flag1 = 0;
-		flag3 = 0;
+		
+		if(sscanf(str, "%c", &znak) == 1){
+			if(znak == 'x'){
+				flag4 = 1;
+				return;
+			}
+		}	 
+		
 		if(flag0 && stav == OPR1){
-			flag0 = 0;
 			sscanf(str, "%c", &ka->ope);
 			
 			if(isOperator(ka->ope)){
-				ka->a = ka->vys;
+				*d = ka->vys;
 				flag1 = 1;
 				flag2 = 1;
 				return;
 				
 			}else if(ka->ope == '=' && flag2){ 
-				flag3 = 1;
 				ka->ope = ka->prev_ope;
-				ka->a = ka->vys;
+				*d = ka->vys;
 				return;
-			}
+			} 
 		}
-		puts("zadej operand_cislo!");
+		puts("zadej cislo!:");
 		fgets(str, 10, stdin);
 	}
-	flag0 = 0;
+	if(stav == OPR1) {
+		flag2 = 0;
+	}
 }
 
 void zadejOperator(char *str, struct KalkulData *ka){
 	do{
-		puts("zadej operator: +,-,*,/ ");
+		puts("zadej operator +,-,*,/ :");
 		fgets(str, 10, stdin);
 		sscanf(str, "%c", &ka->ope);
 		if(ka->ope == 'x'){
